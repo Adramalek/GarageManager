@@ -1,0 +1,48 @@
+backend/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+backend/.apt_generated
+backend/.classpath
+backend/.factorypath
+backend/.project
+backend/.settings
+backend/.springBeans
+backend/.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+backend/.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+backend/nbproject/private/
+backend/build/
+backend/nbbuild/
+backend/dist/
+backend/nbdist/
+backend/.nb-gradle/
+
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+frontend/node_modules
+
+# testing
+frontend/coverage
+
+# production
+frontend/build
+
+# misc
+frontend/.DS_Store
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
