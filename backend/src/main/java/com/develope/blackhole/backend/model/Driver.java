@@ -1,5 +1,6 @@
 package com.develope.blackhole.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NonNull;
 import org.springframework.lang.Nullable;
@@ -15,12 +16,12 @@ public class Driver {
     private @NotBlank String firstName;
     private @NotBlank String secondName;
     private @NonNull Integer experienceInYears;
-//    private @Nullable @OneToOne(cascade = CascadeType.ALL) Car assignedCar;
+    private @JsonIgnore @Nullable @OneToOne(cascade = CascadeType.ALL) Car assignedCar;
 
-    public Driver(@NotBlank String firstName, @NotBlank String secondName, Integer experienceInYears) {
+    public Driver(@NotBlank String firstName, @NotBlank String secondName, Integer experienceInYears, @Nullable Car assignedCar) {
         this.firstName = firstName;
         this.secondName = secondName;
         this.experienceInYears = experienceInYears;
-//        this.assignedCar = assignedCar;
+        this.assignedCar = assignedCar;
     }
 }

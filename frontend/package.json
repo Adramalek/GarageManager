@@ -5,8 +5,10 @@
   "dependencies": {
     "ajax": "0.0.4",
     "ajv": "^6.5.2",
+    "axios": "^0.18.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
+    "cors": "^2.8.4",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-scripts": "1.1.4",

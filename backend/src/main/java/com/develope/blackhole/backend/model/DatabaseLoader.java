@@ -37,13 +37,15 @@ public class DatabaseLoader implements CommandLineRunner {
         DEFAULT_DRIVERS = List.of(
                 new Driver("Ivan",
                         "Ivanov",
-                        6),
+                        6,
+                        null),
                 new Driver("Oleg",
                         "Olegov",
-                        4)
+                        4,
+                        null)
         );
         DEFAULT_CARS.get(0).setAssignedDriver(DEFAULT_DRIVERS.get(1));
-
+        DEFAULT_CARS.get(1).setAssignedDriver(DEFAULT_DRIVERS.get(0));
     }
 
     @Override
