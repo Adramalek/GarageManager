@@ -1,7 +1,11 @@
 package com.develope.blackhole.backend.model;
 
 
+import com.develope.blackhole.backend.GarageRecordJsonSerializer;
 import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.module.jsonSchema.annotation.JsonHyperSchema;
+import com.fasterxml.jackson.module.jsonSchema.annotation.Link;
 import lombok.Data;
 import lombok.NonNull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -23,10 +27,5 @@ public class GarageRecord extends ResourceSupport {
     public GarageRecord(@NonNull Car car, @NonNull Driver driver){
         this.car = car;
         this.driver = driver;
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
     }
 }

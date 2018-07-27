@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,28 +32,25 @@ public class GarageController {
         this.driverRepository = driverRepository;
     }
 
-    @GetMapping(value = {"", "?page={page}&size={size}"})
-    public PagedResources<Resource<GarageRecord>> all(
-//            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
-//            @RequestParam(name = "size", required = false, defaultValue = "5") int size
-            @PathVariable(name = "page",required = false) Integer page,
-            @PathVariable(name = "size", required = false) Integer size
+    @GetMapping
+    public PagedResources<Resource<GarageRecord>> getPage(
+            @RequestParam Optional<Long> page,
+            @RequestParam Optional<Long> size
     )
     {
-        Optional<Integer> optionalPage = Optional.ofNullable(page);
-        Optional<Integer> optionalSize = Optional.ofNullable(size);
-        int _page = optionalPage.orElse(0);
-        int _size = optionalSize.orElse(5);
-        List<Car> cars = StreamSupport
-                .stream(carRepository.findCarsByAssignedDriverNotNull().spliterator(),false)
-                .collect(Collectors.toList());
+        long _page = page.orElse(0L);
+        long _size = size.orElse(20L);
 
-        List<Resource<GarageRecord>> garageRecordResources = cars.stream()
+        long lastPage = carRepository.countByAssignedDriverNotNull()/_size-1;
+        List<Resource<GarageRecord>> garageRecordResources = StreamSupport
+                .stream(carRepository.findCarsByAssignedDriverNotNull()
+                                .spliterator(),
+                        false)
                 .skip(_page*_size)
                 .limit(_size)
-                .map(car -> new GarageRecord(car, car.getAssignedDriver(), car.getId()))
+                .map(car -> new GarageRecord(car, car.getAssignedDriver()))
                 .map(record -> {
-                    String id = record.getRecordId().toString();
+                    String id = record.getCar().getId().toString();
                     Link selfLink = linkTo(GarageController.class)
                             .slash(id)
                             .withSelfRel();
@@ -69,32 +67,33 @@ public class GarageController {
                 .collect(Collectors.toList());
         List<Link> links = new ArrayList<>();
         Link selfRel = linkTo(GarageController.class).withSelfRel();
-        int lastPage = cars.size()/_size-1;
-        if (optionalPage.isPresent()){
+        if (page.isPresent()){
             Link first = linkTo(methodOn(GarageController.class)
-                    .all(0, _size))
+                    .getPage(Optional.of(0L), size))
                     .withRel("first");
             links.add(first);
         }
         Link last = linkTo(methodOn(GarageController.class)
-                .all(lastPage, _size))
+                .getPage(Optional.of(lastPage), size))
                 .withRel("last");
         if (_page > 0) {
             Link prev = linkTo(methodOn(GarageController.class)
-                    .all(_page-1, _size))
+                    .getPage( Optional.of(_page-1), size))
                     .withRel("prev");
             links.add(prev);
         }
         links.add(selfRel);
         if (_page < lastPage){
             Link next = linkTo(methodOn(GarageController.class)
-                    .all(_page+1, _size))
+                    .getPage(Optional.of(_page+1), size))
                     .withRel("next");
             links.add(next);
         }
-        if (optionalPage.isPresent()){
+        if (page.isPresent()){
             links.add(last);
         }
+        Link profile = linkTo(ProfilesController.class).slash("garage").withRel("profile");
+        links.add(profile);
         return new PagedResources<>(
                 garageRecordResources,
                 new PagedResources.PageMetadata(
@@ -104,15 +103,34 @@ public class GarageController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GarageRecord> get(@PathVariable final Long id){
+    public ResponseEntity<Resource<GarageRecord>> get(@PathVariable final Long id){
         GarageRecord record;
         Optional<Car> optionalCar = carRepository.findById(id);
         if (optionalCar.isPresent()){
             Car car = optionalCar.get();
             if (car.getAssignedDriver() == null)
                 return ResponseEntity.notFound().build();
-            record = new GarageRecord(car, car.getAssignedDriver(), car.getId());
-            return ResponseEntity.ok(record);
+            List<Link> links = new ArrayList<>();
+            Link selfLink = linkTo(GarageController.class).withSelfRel();
+            Link recordLink = linkTo(GarageController.class).withRel("record");
+            Link carLink = new Link(
+                    linkTo(GarageController.class)
+                            .slash(car.getId())
+                            .toString()
+                            .replace("garage", "cars"))
+                    .withRel("car");
+            Link driverLink = new Link(
+                    linkTo(GarageController.class)
+                            .slash(car.getAssignedDriver().getId())
+                            .toString()
+                            .replace("garage", "drivers"))
+                    .withRel("driver");
+            links.add(selfLink);
+            links.add(recordLink);
+            links.add(carLink);
+            links.add(driverLink);
+            record = new GarageRecord(car, car.getAssignedDriver());
+            return ResponseEntity.ok(new Resource<>(record, links));
         }
         else return ResponseEntity.notFound().build();
     }
